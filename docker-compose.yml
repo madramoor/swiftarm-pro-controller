@@ -1,0 +1,18 @@
+version: '3.9'
+
+services:
+  swift_arm_api:
+    build: .
+    container_name: swift_arm_controller
+    ports:
+      - "5000:5000"
+    devices:
+      - /dev/ttyUSB0:/dev/ttyUSB0
+    environment:
+      FLASK_ENV: production
+    restart: on-failure:5
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
