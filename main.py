@@ -1,4 +1,4 @@
-"""Entry point with UTF-8 encoding fix"""
+"""Entry point with COM11 configuration"""
 import os
 from flask import Flask
 from app import create_app
@@ -6,12 +6,17 @@ from backend.arm_controller import SwiftArmController
 from backend.mock_controller import MockArmController
 
 if __name__ == '__main__':
-    # Create controller - use mock if hardware not available
-    controller = SwiftArmController('/dev/ttyUSB0')
+    # Create controller on COM11
+    controller = SwiftArmController('COM11')
     try:
-        controller.connect()
-    except:
-        print("Using mock controller (no hardware connected)")
+        result = controller.connect()
+        if result:
+            print("✅ Successfully connected to SwiftArm Pro on COM11")
+        else:
+            print("❌ Failed to connect. Using mock controller.")
+            controller = MockArmController()
+    except Exception as e:
+        print(f"❌ Connection error: {e}")
         controller = MockArmController()
     
     # Create Flask app
