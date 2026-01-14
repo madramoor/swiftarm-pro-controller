@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="color-scheme" content="dark light" />
+  <title>SwiftArm Pro — Control Dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="app-header" role="banner">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">SA</div>
+      <div class="brand-text">
+        <h1>SwiftArm Pro</h1>
+        <p class="subtitle">Robot Arm Control Dashboard</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <div class="status" aria-label="Connection status">
+        <span id="connDot" class="dot dot--disconnected" aria-hidden="true"></span>
+        <span id="connText" class="status-text">Disconnected</span>
+      </div>
+
+      <button id="themeToggle" class="btn btn--ghost" type="button" aria-pressed="false">
+        <span class="icon" aria-hidden="true">◐</span>
+        <span class="btn-label">Theme</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main" class="container" role="main">
+    <div class="grid">
+      <!-- Emergency Stop -->
+      <section class="card card--estop" aria-labelledby="estopTitle">
+        <div class="card-header">
+          <h2 id="estopTitle">Emergency Stop</h2>
+          <p class="muted">Complies with ISO 13850 intent: prominent, immediate, deliberate.</p>
+        </div>
+
+        <button
+          id="eStopBtn"
+          class="estop"
+          type="button"
+          aria-describedby="estopHelp"
+        >
+          EMERGENCY STOP
+        </button>
+        <p id="estopHelp" class="assist">
+          Activates immediate stop. Use only in emergency situations.
+        </p>
+
+        <div class="estop-row">
+          <button id="resetEStopBtn" class="btn btn--danger-outline" type="button">
+            Reset E-Stop
+          </button>
+          <span id="estopState" class="pill pill--neutral" role="status" aria-live="polite">
+            E-Stop: Unknown
+          </span>
+        </div>
+      </section>
+
+      <!-- Position Display -->
+      <section class="card" aria-labelledby="posTitle">
+        <div class="card-header">
+          <h2 id="posTitle">Real-time Position</h2>
+          <p class="muted">Updates every 500ms (polling <code>/api/status</code>).</p>
+        </div>
+
+        <div class="pos-grid" role="group" aria-label="Current position readout">
+          <div class="metric">
+            <div class="metric-label">X</div>
+            <div class="metric-value"><span id="posX">—</span><span class="unit">mm</span></div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Y</div>
+            <div class="metric-value"><span id="posY">—</span><span class="unit">mm</span></div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Z</div>
+            <div class="metric-value"><span id="posZ">—</span><span class="unit">mm</span></div>
+          </div>
+        </div>
+
+        <div class="divider" role="separator" aria-hidden="true"></div>
+
+        <div class="two-col">
+          <div class="kv">
+            <div class="kv-label">Robot</div>
+            <div class="kv-value" id="robotName">SwiftArm Pro</div>
+          </div>
+          <div class="kv">
+            <div class="kv-label">Last Update</div>
+            <div class="kv-value" id="lastUpdate">—</div>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="kv">
+            <div class="kv-label">Gripper</div>
+            <div class="kv-value" id="gripperState">—</div>
+          </div>
+          <div class="kv">
+            <div class="kv-label">Pump</div>
+            <div class="kv-value" id="pumpState">—</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Controls -->
+      <section class="card" aria-labelledby="ctrlTitle">
+        <div class="card-header">
+          <h2 id="ctrlTitle">Controls</h2>
+          <p class="muted">Validated motion limits: X 50–320, Y −200–200, Z 0–150.</p>
+        </div>
+
+        <form id="moveForm" class="form" novalidate>
+          <fieldset class="fieldset">
+            <legend class="legend">Move To Position</legend>
+
+            <div class="form-grid">
+              <div class="field">
+                <label for="xInput">X (50–320)</label>
+                <input
+                  id="xInput"
+                  name="x"
+                  type="number"
+                  inputmode="decimal"
+                  autocomplete="off"
+                  min="50"
+                  max="320"
+                  step="0.1"
+                  required
+                  aria-describedby="xHelp xErr"
+                />
+                <div id="xHelp" class="help">Millimeters (mm)</div>
+                <div id="xErr" class="error" aria-live="polite"></div>
+              </div>
+
+              <div class="field">
+                <label for="yInput">Y (−200–200)</label>
+                <input
+                  id="yInput"
+                  name="y"
+                  type="number"
+                  inputmode="decimal"
+                  autocomplete="off"
+                  min="-200"
+                  max="200"
+                  step="0.1"
+                  required
+                  aria-describedby="yHelp yErr"
+                />
+                <div id="yHelp" class="help">Millimeters (mm)</div>
+                <div id="yErr" class="error" aria-live="polite"></div>
+              </div>
+
+              <div class="field">
+                <label for="zInput">Z (0–150)</label>
+                <input
+                  id="zInput"
+                  name="z"
+                  type="number"
+                  inputmode="decimal"
+                  autocomplete="off"
+                  min="0"
+                  max="150"
+                  step="0.1"
+                  required
+                  aria-describedby="zHelp zErr"
+                />
+                <div id="zHelp" class="help">Millimeters (mm)</div>
+                <div id="zErr" class="error" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="field field--slider">
+              <div class="slider-head">
+                <label for="speedSlider">Speed</label>
+                <output id="speedOut" for="speedSlider" class="speed-out">— mm/min</output>
+              </div>
+              <input
+                id="speedSlider"
+                name="speed"
+                type="range"
+                min="1"
+                max="2000"
+                step="1"
+                value="500"
+                aria-describedby="speedHelp"
+              />
+              <div id="speedHelp" class="help">1–2000 mm/min</div>
+            </div>
+
+            <div class="actions">
+              <button id="moveBtn" class="btn btn--primary" type="submit">
+                Move
+              </button>
+              <button id="fillFromCurrentBtn" class="btn btn--ghost" type="button">
+                Use Current Position
+              </button>
+            </div>
+          </fieldset>
+
+          <fieldset class="fieldset">
+            <legend class="legend">Tools</legend>
+
+            <div class="actions actions--tools">
+              <button id="gripperToggleBtn" class="btn btn--secondary" type="button" aria-pressed="false">
+                Gripper: Toggle
+              </button>
+
+              <button id="pumpToggleBtn" class="btn btn--secondary" type="button" aria-pressed="false">
+                Pump: Toggle
+              </button>
+            </div>
+          </fieldset>
+        </form>
+
+        <div class="divider" role="separator" aria-hidden="true"></div>
+
+        <section aria-labelledby="logTitle">
+          <h3 id="logTitle" class="sr-only">System messages</h3>
+
+          <div id="msgRegion" class="msg" role="status" aria-live="polite" aria-atomic="true">
+            Ready.
+          </div>
+
+          <details class="details">
+            <summary>Connection & API</summary>
+            <div class="details-body">
+              <div class="kv">
+                <div class="kv-label">API Base</div>
+                <div class="kv-value"><code id="apiBaseText">http://localhost:5000/api</code></div>
+              </div>
+              <div class="kv">
+                <div class="kv-label">Polling</div>
+                <div class="kv-value">500 ms</div>
+              </div>
+              <div class="kv">
+                <div class="kv-label">Last Error</div>
+                <div class="kv-value" id="lastError">—</div>
+              </div>
+            </div>
+          </details>
+        </section>
+      </section>
+    </div>
+  </main>
+
+  <footer class="app-footer" role="contentinfo">
+    <small>SwiftArm Pro Dashboard • Vanilla HTML/CSS/JS • WCAG 2.2-aware UI</small>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
